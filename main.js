@@ -3,6 +3,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 
 
+
+const color3 = new THREE.Color("rgb(255, 0, 0)");
+
 let gray = 0x808080
 let lime = 0x00ff00
 let black = 0x000000
@@ -12,55 +15,42 @@ let allCubes = []
 let cubeScale = 10
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(90, 2, 0.1, 10000)
-camera.position.z = 8;
+const camera = new THREE.PerspectiveCamera(90, window.innerWidth/window.innerHeight, 0.1, 10000)
+camera.position.z = 12;
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+
+
 const clock = new THREE.Clock(true)
 const controls = new OrbitControls( camera, renderer.domElement );
-// controls.autoRotate = true
-
-
-// renderer.shadowMap.enabled = true;
-// renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
-
-// //Create a DirectionalLight and turn on shadows for the light
-// const light = new THREE.DirectionalLight( 0xffffff, 1 );
-// light.position.set( 0, 100, 0 ); //default; light shining from top
-// light.castShadow = true; // default false
-// scene.add( light );
-// light.shadow.mapSize.width = 512; // default
-// light.shadow.mapSize.height = 512; // default
-// light.shadow.camera.near = 0.5; // default
-// light.shadow.camera.far = 500; // default
 
 
 
-const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-const material = new THREE.MeshBasicMaterial( { color: lime } );
+const geometry = new THREE.BoxGeometry( 10, 10, 10 );
+const material = new THREE.MeshBasicMaterial( { color: randomColor() } );
 const starterCube = new THREE.Mesh( geometry, material );
 scene.add( starterCube );
 allCubes.push(starterCube)
 
 function animate() {
-  // starterCube.rotateY(.02)
-  // controls.update(clock.getDelta);
 	renderer.render( scene, camera );
 }
 renderer.setAnimationLoop( animate );
 
 
+function randomColor() {
+  var o = Math.round, r = Math.random, s = 255;
+  return 'rgb(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ')';
+}
 
 
 
 
-
-
-const relations = [
+const relations = [ //relative positions of where new smaller cubes will be generated centered on single large cube
   {x:1, y:1, z:0},
   {x:1, y:-1, z:0},
   {x:-1, y:1, z:0},
@@ -100,21 +90,16 @@ const fractalize = () => {
 
 }
 
-let tempDivider = 1.5
+let tempDivider = 1
 const makeCube = (x, y, z, startPos) => {
   const geometry = new THREE.BoxGeometry( cubeScale/tempDivider, cubeScale/tempDivider, cubeScale/tempDivider );
-  const material = new THREE.MeshBasicMaterial( { color: white } );
+  const material = new THREE.MeshBasicMaterial( { color: randomColor() } );
   const newCube = new THREE.Mesh( geometry, material );
+
   newCube.position.x = startPos.x + (x * cubeScale)
   newCube.position.y = startPos.y + (y * cubeScale)
   newCube.position.z = startPos.z + (z * cubeScale)
 
-  // newCube.castShadow = true; //default is false
-  // newCube.receiveShadow = true; //default
-
-  // const edges = new THREE.EdgesGeometry( geometry ); 
-  // const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial( { color: black } ) ); 
-  // scene.add( line );
   scene.add(newCube)
   return newCube
 }
@@ -122,3 +107,4 @@ const makeCube = (x, y, z, startPos) => {
 fractalize()
 fractalize()
 fractalize()
+
