@@ -12,6 +12,7 @@ let black = 0x000000
 let white = 0xFFFFFF
 
 let allCubes = []
+let cubeStorage = []
 let cubeScale = 10
 
 const scene = new THREE.Scene();
@@ -35,6 +36,7 @@ const material = new THREE.MeshBasicMaterial( { color: randomColor() } );
 const starterCube = new THREE.Mesh( geometry, material );
 scene.add( starterCube );
 allCubes.push(starterCube)
+cubeStorage.push(starterCube)
 
 function animate() {
 	renderer.render( scene, camera );
@@ -46,6 +48,21 @@ function randomColor() {
   var o = Math.round, r = Math.random, s = 255;
   return 'rgb(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ')';
 }
+
+
+
+var left_arrow = 37; 
+var right_arrow = 39; 
+
+window.onkeydown= function(key){ 
+  if(key.keyCode === left_arrow){ 
+    fractalize("Left")
+  }
+  if(key.keyCode === right_arrow) { 
+    fractalize("Right")
+  }
+};
+
 
 
 
@@ -74,20 +91,62 @@ const relations = [ //relative positions of where new smaller cubes will be gene
 ]
 
 
+let depthCounter = 0
+let previousDepth = 0
+const fractalize = (direction) => {
+  previousDepth = depthCounter
+  if (direction == "Left") {
+    if (depthCounter != 0) {
+      depthCounter -= 1
 
-const fractalize = () => {
-  let newCubes = []
-  cubeScale = cubeScale/3
-  for (let a = 0; a < allCubes.length; a++) {
-    for (let i = 0; i < relations.length; i++) {
-      newCubes.push(makeCube(relations[i].x, relations[i].y, relations[i].z, allCubes[a].position))
+      for (let c = 0; c < allCubes.length; c++) {
+        allCubes[c].geometry = undefined
+        allCubes[c].material = undefined
+        scene.remove(allCubes[c])
+      }
+
+      let newCubes = []
+      cubeScale = cubeScale*3
+      console.log(cubeStorage[depthCounter].length)
+      if (cubeStorage[depthCounter].length == undefined) {
+        newCubes.push(makeCube(cubeStorage[depthCounter].x, cubeStorage[depthCounter].y, cubeStorage[depthCounter].z, cubeStorage[depthCounter].position))
+      }
+      for (let a = 0; a < cubeStorage[depthCounter].length; a++) {
+        newCubes.push(makeCube(cubeStorage[depthCounter][a].x, cubeStorage[depthCounter][a].y, cubeStorage[depthCounter][a].z, cubeStorage[depthCounter][a].position))
+
+  
+      }
+      
+      allCubes = newCubes
+
     }
-    allCubes[a].geometry = undefined
-    allCubes[a].material = undefined
-    scene.remove(allCubes[a])
-  }
-  allCubes = newCubes
+    console.log(depthCounter)
 
+  } else if (direction == "Right") {
+    depthCounter += 1
+    console.log(depthCounter)
+    
+    let newCubes = []
+    cubeScale = cubeScale/3
+    for (let a = 0; a < allCubes.length; a++) {
+      for (let i = 0; i < relations.length; i++) {
+        newCubes.push(makeCube(relations[i].x, relations[i].y, relations[i].z, allCubes[a].position))
+      }
+      allCubes[a].geometry = undefined
+      allCubes[a].material = undefined
+      scene.remove(allCubes[a])
+    }
+    allCubes = newCubes
+
+    if (cubeStorage[depthCounter] == undefined) {
+      cubeStorage.push(allCubes)
+    }
+  
+    
+  } 
+
+
+  
 }
 
 let tempDivider = 1
@@ -96,9 +155,16 @@ const makeCube = (x, y, z, startPos) => {
   const material = new THREE.MeshBasicMaterial( { color: randomColor() } );
   const newCube = new THREE.Mesh( geometry, material );
 
-  newCube.position.x = startPos.x + (x * cubeScale)
-  newCube.position.y = startPos.y + (y * cubeScale)
-  newCube.position.z = startPos.z + (z * cubeScale)
+  if (previousDepth < depthCounter) {
+    newCube.position.x = startPos.x + (x * cubeScale)
+    newCube.position.y = startPos.y + (y * cubeScale)
+    newCube.position.z = startPos.z + (z * cubeScale)
+  } else {
+    newCube.position.x = startPos.x
+    newCube.position.y = startPos.y
+    newCube.position.z = startPos.z
+  }
+
 
   scene.add(newCube)
   return newCube
