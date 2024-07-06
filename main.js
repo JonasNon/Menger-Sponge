@@ -28,7 +28,7 @@ document.body.appendChild(renderer.domElement);
 
 const clock = new THREE.Clock(true)
 const controls = new OrbitControls( camera, renderer.domElement );
-
+clock.start()
 
 
 const geometry = new THREE.BoxGeometry( 10, 10, 10 );
@@ -38,7 +38,22 @@ scene.add( starterCube );
 allCubes.push(starterCube)
 cubeStorage.push(starterCube)
 
+let manualTimer = 0
+const timeBetweenColors = 0.5
 function animate() {
+  if (true) {
+    manualTimer += clock.getDelta()
+    if (manualTimer > timeBetweenColors) { //clock.elapsedTime also works
+      manualTimer = 0
+      console.log(allCubes.length)
+      for (let k = 0; k < allCubes.length; k++) {
+        let randomHex = '0x'+(Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0')
+        allCubes[k].material.color.setHex(randomHex)
+      }
+      camera.updateProjectionMatrix()
+    }
+    
+  }
 	renderer.render( scene, camera );
 }
 renderer.setAnimationLoop( animate );
@@ -110,6 +125,7 @@ const fractalize = (direction) => {
       console.log(cubeStorage[depthCounter].length)
       if (cubeStorage[depthCounter].length == undefined) {
         newCubes.push(makeCube(cubeStorage[depthCounter].x, cubeStorage[depthCounter].y, cubeStorage[depthCounter].z, cubeStorage[depthCounter].position))
+        newCubes[0].material.color.setHex(white)
       }
       for (let a = 0; a < cubeStorage[depthCounter].length; a++) {
         newCubes.push(makeCube(cubeStorage[depthCounter][a].x, cubeStorage[depthCounter][a].y, cubeStorage[depthCounter][a].z, cubeStorage[depthCounter][a].position))
